@@ -6,6 +6,7 @@ import models
 from fastapi import FastAPI, Request, Depends
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from database import SessionLocal, engine
 from pydantic import BaseModel
 from models import Product
@@ -45,7 +46,9 @@ def table(request: Request, db: Session = Depends(get_db), name = None, operatio
     if name == '0' and operation == '0':
         products = products.filter(Product.name == argument)
     elif name == '0' and operation == '1':
-        products = products.filter(Product.name.like(f"%{argument}%"))
+        products = products.filter(or_(Product.name.like(f"%{argument.lower()}%"),\
+                                    Product.name.like(f"%{argument.upper()}%"),\
+                                    Product.name.like(f"%{argument.capitalize()}%")))
     elif name == '1' and operation == '0':
         products = products.filter(Product.quantity == argument)
     elif name == '1' and operation == '2':
